@@ -2,6 +2,8 @@
 
 Aplikasi web toko sepatu modern yang dibangun menggunakan **Streamlit**. SepatuKu menyediakan pengalaman belanja online yang simple namun menarik, lengkap dengan fitur daftar produk, keranjang belanja, checkout, dan autentikasi pengguna.
 
+🔗 **Akses Web Online**: [https://sepatuku-ukpl.streamlit.app/](https://sepatuku-ukpl.streamlit.app/)
+
 ---
 
 ## 🎯 Fitur Utama
