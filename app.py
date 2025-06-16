@@ -241,14 +241,7 @@ def render_app_bar():
         cart_text = f"🛒 Keranjang" 
         if st.button(cart_text, key="nav_cart"):
             navigate_to('cart')
-    
-    with col6:
-        if st.button("🚪 Keluar", key="logout"):
-            st.session_state.is_logged_in = False
-            st.session_state.username = ""
-            st.session_state.cart = []
-            st.session_state.favorites = []
-            navigate_to('login')
+
 
 def render_home_page(sepatu_data):
     """Render halaman utama dengan promo banner dan grid layout"""
@@ -638,28 +631,104 @@ def render_receipt_page():
     st.balloons()
     st.success("🎉 Pembelian berhasil! Terima kasih telah berbelanja di SepatuKu Store!")
 
+def render_history_page():
+    """Render halaman riwayat pembelian user"""
+    st.markdown("## 🗂️ Riwayat Pembelian")
+
+    user = st.session_state.username
+    orders = [order for order in st.session_state.order_history if order['username'] == user]
+
+    if not orders:
+        st.markdown("""
+        <div class="empty-state">
+            <div class="empty-icon">📦</div>
+            <h3>Belum ada riwayat pembelian</h3>
+            <p>Kamu belum pernah melakukan transaksi.</p>
+        </div>
+        """, unsafe_allow_html=True)
+        return
+
+    for order in reversed(orders):
+        with st.expander(f"📟 Order ID: {order['order_id']} — {order['order_date']}"):
+            st.markdown(f"""
+            **Nama:** {order['nama']}  
+            **Telepon:** {order['telepon']}  
+            **Alamat:** {order['alamat']}  
+            **Bank:** {order['bank']}  
+            **Kode Bank:** {order['kode_bank']}  
+            **Total Pembayaran:** {format_rupiah(order['total'])}
+            """)
+            st.markdown("**Detail Barang:**")
+            for item in order['items']:
+                st.markdown(f"- {item['nama']} (Ukuran {item['ukuran']}) x {item['quantity']} = {format_rupiah(item['harga'] * item['quantity'])}")
+
+
+def render_app_bar():
+    """Render app bar dengan navigasi"""
+    st.markdown("""
+    <div class="app-bar">
+        <div class="app-bar-content">
+            <div class="app-title">👟 SepatuKu</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    col1, col2, col3, col4, col5, col6 = st.columns([1, 1, 1, 1, 1, 1])
+
+    with col1:
+        search_query = st.text_input("🔍", placeholder="Cari sepatu...",
+            value=st.session_state.search_query,
+            key="search_input", label_visibility="collapsed")
+        if search_query != st.session_state.search_query:
+            st.session_state.search_query = search_query
+            st.rerun()
+
+    with col2:
+        sort_options = ["Sort by", "Nama A-Z", "Nama Z-A", "Harga Terendah", "Harga Tertinggi"]
+        sort_option = st.selectbox("Filter", sort_options,
+            index=sort_options.index(st.session_state.sort_option),
+            key="sort_select", label_visibility="collapsed")
+        if sort_option != st.session_state.sort_option:
+            st.session_state.sort_option = sort_option
+            st.rerun()
+
+    with col3:
+        if st.button("🏠 Beranda", key="nav_home"):
+            navigate_to('home')
+
+    with col4:
+        if st.button("❤️ Favorit", key="nav_favorites"):
+            navigate_to('favorites')
+
+    with col5:
+        if st.button("🛒 Keranjang", key="nav_cart"):
+            navigate_to('cart')
+
+    with col6:
+        if st.button("🗂️ Riwayat", key="nav_history"):
+            navigate_to('history')
+
+    if st.button("🚪 Keluar", key="logout"):
+        st.session_state.is_logged_in = False
+        st.session_state.username = ""
+        st.session_state.cart = []
+        st.session_state.favorites = []
+        navigate_to('login')
+
 
 def main():
-    # Load CSS
     load_css()
-    
-    # Initialize session state
     init_session_state()
-    
-    # Load data
     sepatu_data = load_sepatu_data()
-    
-    # Check login status
+
     if not st.session_state.is_logged_in:
         if st.session_state.current_page == 'register':
             render_register_page()
         else:
             render_login_page()
     else:
-        # Render app bar untuk user yang sudah login
         render_app_bar()
-        
-        # Route berdasarkan current_page
+
         if st.session_state.current_page == 'home':
             render_home_page(sepatu_data)
         elif st.session_state.current_page == 'detail':
@@ -672,14 +741,16 @@ def main():
             render_checkout_page()
         elif st.session_state.current_page == 'receipt':
             render_receipt_page()
-        
-        # Footer
+        elif st.session_state.current_page == 'history':
+            render_history_page()
+
         st.markdown("---")
         st.markdown("""
         <div class="footer">
             <p>© 2024 SepatuKu Store</p>
         </div>
         """, unsafe_allow_html=True)
+
 
 if __name__ == "__main__":
     main()
