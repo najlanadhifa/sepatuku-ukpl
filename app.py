@@ -744,13 +744,5 @@ def main():
         elif st.session_state.current_page == 'history':
             render_history_page()
 
-        st.markdown("---")
-        st.markdown("""
-        <div class="footer">
-            <p>© 2024 SepatuKu Store</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-
 if __name__ == "__main__":
     main()
